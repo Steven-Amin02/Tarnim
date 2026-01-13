@@ -43,6 +43,10 @@ public partial class App : Application
                 }
             }
         }
+
+        // Show Splash Screen
+        var splash = new SplashScreen();
+        splash.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)

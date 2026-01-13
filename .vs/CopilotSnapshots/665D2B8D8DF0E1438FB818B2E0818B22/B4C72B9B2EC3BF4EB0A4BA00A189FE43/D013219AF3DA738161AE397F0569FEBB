@@ -1,0 +1,123 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+using Tarnim.Models;
+using Tarnim.Services;
+
+namespace Tarnim
+{
+    /// <summary>
+    /// Settings window for customizing app appearance.
+    /// </summary>
+    public partial class SettingsWindow : Window
+    {
+        private readonly SettingsService _settingsService;
+        private AppSettings _tempSettings;
+
+        public AppSettings? ResultSettings { get; private set; }
+
+        public SettingsWindow(SettingsService settingsService)
+        {
+            InitializeComponent();
+            _settingsService = settingsService;
+
+            // Create a copy of current settings for editing
+            _tempSettings = new AppSettings
+            {
+                LyricsFontSize = settingsService.CurrentSettings.LyricsFontSize,
+                Theme = settingsService.CurrentSettings.Theme,
+                BackgroundColor = settingsService.CurrentSettings.BackgroundColor,
+                PanelColor = settingsService.CurrentSettings.PanelColor,
+                AccentColor = settingsService.CurrentSettings.AccentColor
+            };
+
+            // Initialize UI with current settings
+            FontSizeSlider.Value = _tempSettings.LyricsFontSize;
+            FontSizeText.Text = _tempSettings.LyricsFontSize.ToString();
+            FontPreview.FontSize = _tempSettings.LyricsFontSize;
+
+            // Select the correct color radio button
+            SelectColorRadio(_tempSettings.BackgroundColor);
+
+            // Select the correct theme radio button
+            if (_tempSettings.Theme == Models.ThemeMode.Light)
+                ThemeLight.IsChecked = true;
+            else
+                ThemeDark.IsChecked = true;
+        }
+
+        private void SelectColorRadio(string hexColor)
+        {
+            if (ColorRoyalDark.Parent is WrapPanel panel)
+            {
+                foreach (var child in panel.Children)
+                {
+                    if (child is RadioButton radio && radio.Tag?.ToString() == hexColor)
+                    {
+                        radio.IsChecked = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void FontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (FontSizeText != null && FontPreview != null)
+            {
+                int fontSize = (int)FontSizeSlider.Value;
+                FontSizeText.Text = fontSize.ToString();
+                FontPreview.FontSize = fontSize;
+                _tempSettings.LyricsFontSize = fontSize;
+            }
+        }
+
+        private void ColorRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton radio && radio.Tag is string hexColor)
+            {
+                _tempSettings.BackgroundColor = hexColor;
+            }
+        }
+
+        private void ThemeRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (ThemeDark != null && ThemeLight != null)
+            {
+                _tempSettings.Theme = ThemeDark.IsChecked == true ? Models.ThemeMode.Dark : Models.ThemeMode.Light;
+            }
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultSettings = _tempSettings;
+            _settingsService.UpdateSettings(_tempSettings);
+            DialogResult = true;
+            Close();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultSettings = null;
+            DialogResult = false;
+            Close();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = System.Windows.WindowState.Minimized;
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = this.WindowState == System.Windows.WindowState.Maximized 
+                ? System.Windows.WindowState.Normal 
+                : System.Windows.WindowState.Maximized;
+        }
+    }
+}
+

@@ -1,7 +1,7 @@
 ; Tarnim - Arabic Christian Song Finder Installer
 ; Inno Setup Script
 
-#define MyAppName "ترنيمات روحية - Spiritual Hymns"
+#define MyAppName "ترنيمات روحية"
 #define MyAppNameArabic "ترنيمات روحية"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Tarnim"
@@ -16,7 +16,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=installer_output
 OutputBaseFilename=Tarnim_Setup_{#MyAppVersion}
-SetupIconFile=logo.ico
+SetupIconFile=logoo.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

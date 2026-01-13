@@ -1,4 +1,4 @@
-﻿<ui:FluentWindow x:Class="Tarnim.MainWindow"
+<ui:FluentWindow x:Class="Tarnim.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,56 +6,44 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
         Title="ترنيمات روحية" 
-        Height="700" Width="1000"
+        Height="750" Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource BgBrush}"
-        FlowDirection="LeftToRight"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
         WindowCornerPreference="Round">
 
     <Window.Resources>
-        <!-- 🎨 Semantic Color Palette (Royal Serenity) -->
-        <!-- These are defaults (Dark Mode). They will be swapped by code for Light Mode. -->
-        <Color x:Key="Color.Bg">#0f172a</Color>
-        <Color x:Key="Color.Surface">#1e293b</Color>
-        <Color x:Key="Color.SurfaceHighlight">#334155</Color>
-        <Color x:Key="Color.TextPrimary">#f8fafc</Color>
-        <Color x:Key="Color.TextSecondary">#94a3b8</Color>
-        <Color x:Key="Color.Accent">#fbbf24</Color>
-        <Color x:Key="Color.Border">#334155</Color>
+        <!-- 
+        Note: Semantic color brushes (BgBrush, SurfaceBrush, etc.) are defined in App.xaml
+        and updated at runtime by ApplyTheme() for theme switching.
+        DO NOT redefine them here or they will override the Application-level resources.
+        -->
 
-        <!-- Brushes (Dynamic Access) -->
-        <SolidColorBrush x:Key="BgBrush" Color="{StaticResource Color.Bg}"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Color.Surface}"/>
-        <SolidColorBrush x:Key="SurfaceHighlightBrush" Color="{StaticResource Color.SurfaceHighlight}"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource Color.TextPrimary}"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource Color.TextSecondary}"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Color.Accent}"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Color.Border}"/>
-
-        <!-- 🛡️ Modern Card Style (ListBoxItem) -->
+        <!-- ??? Modern Card Style (ListBoxItem) -->
         <Style x:Key="SongItemStyle" TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="60"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border x:Name="border" 
-                                Background="{StaticResource SurfaceBrush}" 
+                                Background="{DynamicResource SurfaceBrush}" 
                                 CornerRadius="12" 
                                 BorderThickness="1"
                                 BorderBrush="Transparent"
                                 SnapsToDevicePixels="True"
-                                Padding="12">
+                                Padding="15"
+                                MinHeight="65">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="8" ShadowDepth="2" Direction="270" Opacity="0.1"/>
                             </Border.Effect>
                             
                             <!-- Content -->
-                            <ContentPresenter/>
+                            <ContentPresenter VerticalAlignment="Center"/>
 
                             <!-- VisualStates for Animation could be added here, using Triggers for simplicity -->
                         </Border>
@@ -72,7 +60,7 @@
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceHighlightBrush}"/>
                                 <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -80,25 +68,23 @@
             </Setter>
         </Style>
 
-
-
-        <!-- ✨ Modern Gradient Button -->
+        <!-- ? Modern Gradient Button -->
         <Style x:Key="GoldButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="#0f172a"/> <!-- Text is always dark on Gold -->
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="24,10"/>
+            <Setter Property="Padding" Value="20,10"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <Border x:Name="shadow" CornerRadius="10" Background="Black" Margin="0,4,0,0" Opacity="0.2">
+                            <Border x:Name="shadow" CornerRadius="10" Background="Black" Margin="0,3,0,0" Opacity="0.2">
                                 <Border.Effect>
-                                    <BlurEffect Radius="8"/>
+                                    <BlurEffect Radius="6"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="border" CornerRadius="10" Margin="0,0,0,4">
+                            <Border x:Name="border" CornerRadius="10" Margin="0,0,0,3">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                         <GradientStop Color="#fbbf24" Offset="0"/>
@@ -138,7 +124,7 @@
             </Setter>
         </Style>
 
-        <!-- ScrollBar Styling (Unchanged for now, fits well) -->
+        <!-- ScrollBar Styling -->
         <Style TargetType="ScrollBar">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
@@ -147,7 +133,7 @@
                         <Grid x:Name="GridRoot" Width="8" Background="{TemplateBinding Background}">
                             <Track x:Name="PART_Track" IsDirectionReversed="true" Focusable="false">
                                 <Track.Thumb>
-                                    <Thumb Background="{StaticResource SurfaceHighlightBrush}" Style="{DynamicResource ScrollThumbStyle}"/>
+                                    <Thumb Background="{DynamicResource SurfaceHighlightBrush}" Style="{DynamicResource ScrollThumbStyle}"/>
                                 </Track.Thumb>
                             </Track>
                         </Grid>
@@ -166,100 +152,108 @@
         </Style>
     </Window.Resources>
 
-    <Grid FlowDirection="RightToLeft">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Window TitleBar -->
-            <RowDefinition Height="Auto"/> <!-- App Top Bar -->
-            <RowDefinition Height="*"/>    <!-- Main Content -->
-        </Grid.RowDefinitions>
-
-        <!-- Modern TitleBar -->
-        <ui:TitleBar Grid.Row="0" 
+    <DockPanel>
+        <!-- Modern TitleBar (Controls on Right - Isolated from RTL) -->
+        <ui:TitleBar x:Name="AppTitleBar"
+                     DockPanel.Dock="Top"
                      Title="ترنيمات روحية" 
                      ForceShutdown="True"
-                     Background="#0f172a"
-                     Foreground="#f8fafc"
+                     Background="{DynamicResource BgBrush}"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
                      CloseWindowByDoubleClickOnIcon="True"
+                     FlowDirection="LeftToRight"
                      />
 
-        <!-- TOP BAR: Search & Header -->
-        <Grid Grid.Row="1" Margin="20,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/> <!-- Logo/Title -->
-                <ColumnDefinition Width="*"/>   <!-- Centered Search -->
-                <ColumnDefinition Width="150"/> <!-- Actions -->
-            </Grid.ColumnDefinitions>
+        <!-- Main Content Grid (RTL for Arabic) -->
+        <Grid FlowDirection="RightToLeft">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- App Top Bar -->
+                <RowDefinition Height="*"/>    <!-- Main Content -->
+            </Grid.RowDefinitions>
 
-            <!-- Logo -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="🎵" FontSize="24" Margin="0,0,10,0" Foreground="{StaticResource AccentBrush}"/>
-                <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}" 
-                           FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-            </StackPanel>
+            <!-- TOP BAR: Search & Header -->
+            <Grid Grid.Row="0" Margin="25,12,25,15" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/> <!-- Logo/Title -->
+                    <ColumnDefinition Width="*"/>   <!-- Centered Search -->
+                    <ColumnDefinition Width="Auto"/> <!-- Actions -->
+                </Grid.ColumnDefinitions>
 
-            <!-- Center Search Capsule -->
-            <Grid Grid.Column="1" HorizontalAlignment="Center">
-                <ui:TextBox x:Name="SearchBox" 
-                         PlaceholderText="البحث برقم أو كلمات..."
-                         ClearButtonEnabled="True"
-                         TextChanged="SearchBox_TextChanged"
-                         VerticalAlignment="Center"
-                         Width="500"
-                         Height="40"
-                         FontSize="16"
-                         Padding="10,0"/>
+                <!-- Logo -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,30,0">
+                    <TextBlock Text="🎵" FontSize="28" Margin="0,0,12,0" Foreground="{DynamicResource AccentBrush}"/>
+                    <TextBlock Text="ترنيمات روحية" 
+                               FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </StackPanel>
+
+                <!-- Center Search Capsule -->
+                <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ui:TextBox x:Name="SearchBox" 
+                             PlaceholderText="البحث برقم أو كلمات..."
+                             ClearButtonEnabled="True"
+                             TextChanged="SearchBox_TextChanged"
+                             VerticalAlignment="Center"
+                             Width="550"
+                             Height="44"
+                             FontSize="15"
+                             Padding="12,8"/>
+                </Grid>
+
+                <!-- Top Actions -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" FlowDirection="LeftToRight" VerticalAlignment="Center">
+                    <Button x:Name="ShowAllButton"
+                               Click="ShowAllButton_Click" 
+                               Background="Transparent"
+                               BorderThickness="0"
+                               Cursor="Hand" 
+                               ToolTip="عرض كل الترانيم"
+                               Margin="0,0,12,0">
+                        <TextBlock Text="📋" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </Button>
+
+                    <Button x:Name="SettingsButton" Click="SettingsButton_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="الإعدادات">
+                        <TextBlock Text="⚙️" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </Button>
+                </StackPanel>
             </Grid>
 
-            <!-- Top Actions -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" FlowDirection="LeftToRight">
-                <ui:Button x:Name="ShowAllButton"
-                           Icon="AppsList24" 
-                           Appearance="Secondary"
-                           Click="ShowAllButton_Click" 
-                           Cursor="Hand" 
-                           ToolTip="عرض كل الترانيم"
-                           Margin="0,0,10,0"/>
-
-                <Button x:Name="SettingsButton" Click="SettingsButton_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="الإعدادات">
-                    <TextBlock Text="⚙️" FontSize="24" Foreground="{StaticResource TextSecondaryBrush}"/>
-                </Button>
-            </StackPanel>
-        </Grid>
-
         <!-- MAIN LAYOUT -->
-        <Grid Grid.Row="2" Margin="20,10,20,20">
+        <Grid Grid.Row="1" Margin="25,15,25,25">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280"/> <!-- Left Sidebar (History) -->
+                <ColumnDefinition Width="300"/> <!-- Left Sidebar (History) -->
                 <ColumnDefinition Width="*"/>   <!-- Main Content (Lyrics/Search) -->
             </Grid.ColumnDefinitions>
 
             <!-- LEFT SIDEBAR: History -->
             <Border Grid.Column="0" 
-                    Background="{StaticResource SurfaceBrush}" 
+                    Background="{DynamicResource SurfaceBrush}" 
                     CornerRadius="16" 
-                    Margin="0,0,20,0">
-                <Grid Margin="15">
+                    Margin="0,0,25,0"
+                    Padding="0">
+                <Grid Margin="18,18,18,18">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="🕒 سجل العرض" 
+                    <TextBlock Text="🕑 السجل" 
                                FontSize="18" FontWeight="Bold" 
-                               Foreground="{StaticResource TextPrimaryBrush}" 
-                               Margin="0,0,0,15"/>
+                               Foreground="{DynamicResource TextPrimaryBrush}" 
+                               Margin="0,0,0,16"/>
 
                     <ListBox x:Name="HistoryList" 
                              Grid.Row="1"
                              Background="Transparent"
                              BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             SelectionChanged="HistoryList_SelectionChanged">
+                             SelectionChanged="HistoryList_SelectionChanged"
+                             MouseDoubleClick="HistoryList_MouseDoubleClick">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Margin" Value="0,0,0,8"/>
+                                <Setter Property="Cursor" Value="Hand"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
@@ -268,11 +262,12 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
+                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceHighlightBrush}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="#2d3b55"/>
-                                                    <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceHighlightBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -287,24 +282,25 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Background="#334155" CornerRadius="4" Width="24" Height="24" Margin="0,0,10,0">
-                                        <TextBlock Text="{Binding Number}" Foreground="#fbbf24" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+                                    <Border Background="{DynamicResource SurfaceHighlightBrush}" CornerRadius="6" Width="32" Height="32" Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding Number, StringFormat=D3}" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
                                     </Border>
-                                    <TextBlock Grid.Column="1" Text="{Binding Title}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="14" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
                     <Button Grid.Row="2" 
-                            Content="🗑️ مسح السجل" 
+                            Content="مسح السجل" 
                             Click="ClearHistory_Click"
                             Background="Transparent" 
                             BorderThickness="0"
-                            Foreground="{StaticResource TextSecondaryBrush}"
+                            Foreground="{DynamicResource TextSecondaryBrush}"
                             Cursor="Hand"
                             HorizontalAlignment="Center"
-                            Margin="0,10,0,0"/>
+                            Margin="0,12,0,0"
+                            FontSize="13"/>
                 </Grid>
             </Border>
 
@@ -312,13 +308,10 @@
             <Grid Grid.Column="1">
                 <!-- VIEW 1: Search Results (Visible when searching) -->
                 <Grid x:Name="SearchResultsPanel" Visibility="Collapsed" Background="Transparent">
-                    <Grid.Effect>
-                        <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.1"/>
-                    </Grid.Effect>
-                    <Border CornerRadius="16" Background="Transparent" Padding="0">
+                    <Border CornerRadius="16" Background="{DynamicResource SurfaceBrush}" Padding="25,20">
                         <!-- Search Results List -->
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" x:Name="SearchResultsTitle" Text="نتائج البحث" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="10,0,10,15"/>
+                            <TextBlock DockPanel.Dock="Top" x:Name="SearchResultsTitle" Text="نتائج البحث" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,20"/>
                             
                             <Grid>
                                 <ListBox x:Name="ResultsList" 
@@ -326,33 +319,30 @@
                                          BorderThickness="0" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          ItemContainerStyle="{StaticResource SongItemStyle}"
-                                         SelectionChanged="ResultsList_SelectionChanged">
+                                         SelectionChanged="ResultsList_SelectionChanged"
+                                         MouseDoubleClick="ResultsList_MouseDoubleClick">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Margin="0,5">
+                                            <Grid Margin="0,0,0,0">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="50"/> <!-- Code -->
+                                                    <ColumnDefinition Width="Auto"/> <!-- Code -->
                                                     <ColumnDefinition Width="*"/>  <!-- Title + Preview -->
-                                                    <ColumnDefinition Width="Auto"/> <!-- Snippet -->
                                                     <ColumnDefinition Width="Auto"/> <!-- Arrow -->
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Song Number Badge -->
-                                                <Border Background="{StaticResource SurfaceHighlightBrush}" CornerRadius="8" Height="36" Width="40">
-                                                    <TextBlock Text="{Binding Number}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                                <Border Background="{DynamicResource SurfaceHighlightBrush}" CornerRadius="8" Height="45" Width="50" Padding="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Song.Number, StringFormat=D3}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" FontSize="14"/>
                                                 </Border>
 
                                                 <!-- Content -->
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0">
-                                                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                                    <TextBlock Text="{Binding Category}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,20,0" FlowDirection="RightToLeft">
+                                                    <TextBlock Text="{Binding Song.Title}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding MatchingLine}" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,4,0,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Opacity="0.85"/>
                                                 </StackPanel>
 
-                                                <!-- Snippet (Highlighted) -->
-                                                <TextBlock Grid.Column="2" Text="{Binding MatchingLine}" VerticalAlignment="Center" Foreground="#fbbf24" FontSize="16" FontStyle="Italic" TextTrimming="CharacterEllipsis" Opacity="0.9" Margin="15,0"/>
-                                                
                                                 <!-- Icon -->
-                                                <TextBlock Grid.Column="3" Text="➜" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="20" Opacity="0.5" Margin="10,0"/>
+                                                <TextBlock Grid.Column="2" Text="➜" VerticalAlignment="Center" Foreground="{DynamicResource AccentBrush}" FontSize="18" Opacity="0.7" Margin="0,0,5,0"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
@@ -360,9 +350,9 @@
 
                                 <!-- EMPTY STATE -->
                                 <StackPanel x:Name="NoResultsPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.7">
-                                    <TextBlock Text="📉" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                    <TextBlock Text="لا توجد نتائج" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="حاول البحث بكلمات أخرى" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                    <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <TextBlock Text="لا توجد نتائج" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="حاول البحث بكلمات أخرى" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </DockPanel>
@@ -371,7 +361,7 @@
 
                 <!-- VIEW 2: Lyrics Display (Default / Selected) -->
                 <Grid x:Name="LyricsPanel" Visibility="Visible">
-                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="16" Padding="30">
+                    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Padding="35,30">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -380,35 +370,36 @@
                             </Grid.RowDefinitions>
 
                             <!-- Song Header -->
-                            <Grid Grid.Row="0" Margin="0,0,0,20">
+                            <Grid Grid.Row="0" Margin="0,0,0,25">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock x:Name="SongTitleText" Text="اختر ترنيمة للعرض" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
-                                    <TextBlock x:Name="SongCategoryText" Text="يمكنك البحث برقم الترنيمة أو كلماتها" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,5,0,0"/>
+                                    <TextBlock x:Name="SongTitleText" Text="اختر ترنيمة للعرض" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                    <TextBlock x:Name="SongCategoryText" Text="يمكنك البحث برقم الترنيمة أو كلماتها" FontSize="15" Foreground="{DynamicResource AccentBrush}" Margin="0,8,0,0"/>
                                 </StackPanel>
-                                <Border Grid.Column="1" Background="{StaticResource AccentBrush}" CornerRadius="12" Padding="15,5" MinWidth="60" VerticalAlignment="Top">
-                                    <TextBlock x:Name="SongNumberText" Text="#" FontSize="24" FontWeight="Bold" Foreground="#0f172a" HorizontalAlignment="Center"/>
+                                <Border Grid.Column="1" Background="{StaticResource AccentBrush}" CornerRadius="12" Padding="16,6" MinWidth="65" VerticalAlignment="Top" Margin="20,0,0,0">
+                                    <TextBlock x:Name="SongNumberText" Text="#" FontSize="26" FontWeight="Bold" Foreground="#0f172a" HorizontalAlignment="Center"/>
                                 </Border>
                             </Grid>
 
                             <!-- Lyrics Viewer -->
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,25">
                                 <TextBlock x:Name="LyricsText" 
                                            Text="" 
                                            FontSize="28" 
-                                           Foreground="{StaticResource TextPrimaryBrush}" 
+                                           Foreground="{DynamicResource TextPrimaryBrush}" 
                                            TextWrapping="Wrap" 
-                                           LineHeight="45"
-                                           TextAlignment="Center"/>
+                                           LineHeight="48"
+                                           TextAlignment="Center"
+                                           Margin="0,20,0,20"/>
                             </ScrollViewer>
 
-                            <!-- Actions Action -->
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <!-- Actions -->
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button x:Name="OpenPowerPointButton" 
-                                        Content="🖥️ فتح العرض (PPTX)" 
+                                        Content="🖥️ فتح العرض" 
                                         Style="{StaticResource GoldButtonStyle}" 
                                         IsEnabled="False"
                                         Click="OpenPowerPointButton_Click"/>
@@ -418,5 +409,6 @@
                 </Grid> 
             </Grid>
         </Grid>
-    </Grid>
+        </Grid>
+    </DockPanel>
 </ui:FluentWindow>

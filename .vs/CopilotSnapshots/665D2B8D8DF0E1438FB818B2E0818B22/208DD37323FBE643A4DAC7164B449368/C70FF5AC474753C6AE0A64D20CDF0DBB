@@ -1,0 +1,132 @@
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+
+namespace Tarnim.Services
+{
+    /// <summary>
+    /// Service for opening PowerPoint presentations by song number.
+    /// </summary>
+    public class PowerPointService
+    {
+        private readonly string _pptxFolderPath;
+
+        /// <summary>
+        /// Initializes the PowerPointService with the path to the PPTX files folder.
+        /// </summary>
+        /// <param name="pptxFolderPath">Path to the folder containing PPTX files.</param>
+        public PowerPointService(string? pptxFolderPath = null)
+        {
+            // Default to pptx_files folder in the project directory
+            _pptxFolderPath = pptxFolderPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pptx_files");
+        }
+
+        /// <summary>
+        /// Opens the PowerPoint file for the given song number.
+        /// </summary>
+        /// <param name="songNumber">The song number (e.g., 1, 25, 375).</param>
+        /// <returns>Result indicating success or error message.</returns>
+        public PowerPointResult OpenSongPresentation(int songNumber)
+        {
+            try
+            {
+                // Format the song number as 3-digit string (001, 025, 375)
+                string fileName = $"{songNumber:D3}.pptx";
+                string filePath = Path.Combine(_pptxFolderPath, fileName);
+
+                // Check if the PPTX folder exists
+                if (!Directory.Exists(_pptxFolderPath))
+                {
+                    return new PowerPointResult
+                    {
+                        Success = false,
+                        ErrorMessage = $"مجلد العروض غير موجود:\n{_pptxFolderPath}"
+                    };
+                }
+
+                // Check if the specific file exists
+                if (!File.Exists(filePath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PowerPointService] File not found: {filePath}");
+                    // List available files for debugging
+                    var availableFiles = Directory.GetFiles(_pptxFolderPath, "*.pptx");
+                    string fileList = string.Join("\n", availableFiles.Select(Path.GetFileName));
+                    return new PowerPointResult
+                    {
+                        Success = false,
+                        ErrorMessage = $"ملف العرض غير موجود:\n{fileName}\n\nالملفات المتاحة:\n{(fileList != "" ? fileList : "لا توجد ملفات")}"
+                    };
+                }
+
+                // Try to open the file with the default application (PowerPoint)
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                };
+
+                Process.Start(processInfo);
+
+                return new PowerPointResult
+                {
+                    Success = true,
+                    FilePath = filePath
+                };
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // This exception occurs when no application is associated with .pptx files
+                return new PowerPointResult
+                {
+                    Success = false,
+                    ErrorMessage = "لم يتم العثور على برنامج PowerPoint.\nتأكد من تثبيت Microsoft PowerPoint أو برنامج مشابه."
+                };
+            }
+
+            catch (Exception ex)
+            {
+                return new PowerPointResult
+                {
+                    Success = false,
+                    ErrorMessage = $"حدث خطأ أثناء فتح العرض:\n{ex.Message}"
+                };
+            }
+        }
+
+        /// <summary>
+        /// Checks if the PPTX folder exists and contains files.
+        /// </summary>
+        public bool IsPptxFolderAvailable()
+        {
+            return Directory.Exists(_pptxFolderPath) &&
+                   Directory.GetFiles(_pptxFolderPath, "*.pptx").Length > 0;
+        }
+
+        /// <summary>
+        /// Gets the full path to a song's PPTX file.
+        /// </summary>
+        public string GetPptxFilePath(int songNumber)
+        {
+            return Path.Combine(_pptxFolderPath, $"{songNumber:D3}.pptx");
+        }
+
+        /// <summary>
+        /// Checks if a PPTX file exists for the given song number.
+        /// </summary>
+        public bool PptxFileExists(int songNumber)
+        {
+            return File.Exists(GetPptxFilePath(songNumber));
+        }
+    }
+
+    /// <summary>
+    /// Result of a PowerPoint operation.
+    /// </summary>
+    public class PowerPointResult
+    {
+        public bool Success { get; set; }
+        public string? FilePath { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+}

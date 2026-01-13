@@ -21,9 +21,12 @@
     </None>
   </ItemGroup>
 
-  <!-- Copy logo.ico to output -->
+  <!-- Copy logo files to output -->
   <ItemGroup>
     <Resource Include="logo.ico" />
+    <Content Include="logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- Copy pptx_files folder to output -->

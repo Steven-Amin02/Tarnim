@@ -1,0 +1,90 @@
+﻿using System;
+using System.IO;
+using System.Text.Json;
+using Tarnim.Models;
+
+namespace Tarnim.Services
+{
+    /// <summary>
+    /// Service for loading and saving application settings.
+    /// </summary>
+    public class SettingsService
+    {
+        private readonly string _settingsFilePath;
+        private AppSettings _currentSettings;
+
+        public AppSettings CurrentSettings => _currentSettings;
+
+        public SettingsService(string? settingsPath = null)
+        {
+            _settingsFilePath = settingsPath ?? Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, "settings.json");
+            _currentSettings = LoadSettings();
+        }
+
+        /// <summary>
+        /// Loads settings from file or returns defaults.
+        /// </summary>
+        public AppSettings LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(_settingsFilePath))
+                {
+                    string json = File.ReadAllText(_settingsFilePath);
+                    var settings = JsonSerializer.Deserialize<AppSettings>(json);
+                    return settings ?? new AppSettings();
+                }
+            }
+            catch
+            {
+                // If loading fails, return defaults
+            }
+            return new AppSettings();
+        }
+
+        /// <summary>
+        /// Saves current settings to file.
+        /// </summary>
+        public void SaveSettings()
+        {
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(_currentSettings, options);
+                File.WriteAllText(_settingsFilePath, json);
+            }
+            catch
+            {
+                // Silently fail if can't save
+            }
+        }
+
+        /// <summary>
+        /// Updates settings and saves to file.
+        /// </summary>
+        public void UpdateSettings(AppSettings newSettings)
+        {
+            _currentSettings = newSettings;
+            SaveSettings();
+        }
+
+        /// <summary>
+        /// Updates font size and saves.
+        /// </summary>
+        public void SetFontSize(int fontSize)
+        {
+            _currentSettings.LyricsFontSize = Math.Clamp(fontSize, 14, 48);
+            SaveSettings();
+        }
+
+        /// <summary>
+        /// Updates background color and saves.
+        /// </summary>
+        public void SetBackgroundColor(string hexColor)
+        {
+            _currentSettings.BackgroundColor = hexColor;
+            SaveSettings();
+        }
+    }
+}

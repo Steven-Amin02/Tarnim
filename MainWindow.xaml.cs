@@ -6,6 +6,7 @@ using System.Windows.Threading;
 using Tarnim.Models;
 using Tarnim.Services;
 using System.Windows.Media;
+using System.Windows.Input;
 
 using Wpf.Ui.Controls;
 
@@ -62,12 +63,29 @@ public partial class MainWindow : FluentWindow
 
         // Apply saved settings
         ApplySettings();
+
+        // Add keyboard shortcut handler (F5 = Open PowerPoint)
+        this.PreviewKeyDown += MainWindow_PreviewKeyDown;
     }
 
     private static void LoadAllSongs()
     {
         // No longer needed to load all songs into the list on startup
         // The list is now for search results only
+    }
+
+    /// <summary>
+    /// Handles keyboard shortcuts for the main window.
+    /// F5 = Open PowerPoint presentation for selected song
+    /// </summary>
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // F5 - Open PowerPoint presentation
+        if (e.Key == Key.F5 && _selectedSong != null)
+        {
+            OpenPowerPointForSong(_selectedSong);
+            e.Handled = true;
+        }
     }
 
     /// <summary>
@@ -158,6 +176,8 @@ public partial class MainWindow : FluentWindow
         {
             SelectSong(song);
         }
+        // Clear selection
+        HistoryList.SelectedIndex = -1;
     }
 
     private void SelectSong(Song song)
@@ -283,6 +303,9 @@ public partial class MainWindow : FluentWindow
     /// </summary>
     private void ApplySettings()
     {
+        // Reload settings from disk to ensure we have the latest saved settings
+        _settingsService.ReloadSettings();
+
         var settings = _settingsService.CurrentSettings;
         LyricsText.FontSize = settings.LyricsFontSize;
 
@@ -311,11 +334,6 @@ public partial class MainWindow : FluentWindow
                 var accent = (Color)ColorConverter.ConvertFromString("#d97706"); // Amber 600
                 var border = (Color)ColorConverter.ConvertFromString("#e2e8f0"); // Slate 200
 
-
-                // Note: FluentWindow handles its own background via WindowBackdropType, 
-                // but we can set WindowBackground for fallback or custom colors if needed.
-                // this.Background = new SolidColorBrush(bg); 
-
                 // Update Resources
                 Application.Current.Resources["BgBrush"] = new SolidColorBrush(bg);
                 Application.Current.Resources["SurfaceBrush"] = new SolidColorBrush(surface);
@@ -328,6 +346,8 @@ public partial class MainWindow : FluentWindow
             else
             {
                 // 🌙 Dark Theme Palette (Royal Serenity)
+                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark);
+
                 var bg = (Color)ColorConverter.ConvertFromString("#0f172a"); // Slate 900
                 var surface = (Color)ColorConverter.ConvertFromString("#1e293b"); // Slate 800
                 var surfaceHighlight = (Color)ColorConverter.ConvertFromString("#334155"); // Slate 700
@@ -335,8 +355,6 @@ public partial class MainWindow : FluentWindow
                 var textSecondary = (Color)ColorConverter.ConvertFromString("#94a3b8"); // Slate 400
                 var accent = (Color)ColorConverter.ConvertFromString("#fbbf24"); // Amber 400
                 var border = (Color)ColorConverter.ConvertFromString("#334155"); // Slate 700
-
-                // this.Background = new SolidColorBrush(bg);
 
                 // Update Resources
                 Application.Current.Resources["BgBrush"] = new SolidColorBrush(bg);
@@ -348,14 +366,83 @@ public partial class MainWindow : FluentWindow
                 Application.Current.Resources["BorderBrush"] = new SolidColorBrush(border);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore theme application errors
+            System.Diagnostics.Debug.WriteLine($"Theme application error: {ex.Message}");
         }
     }
 
+    /// <summary>
+    /// Shows all songs in the search results panel with professional UX.
+    /// </summary>
     private void ShowAllButton_Click(object sender, RoutedEventArgs e)
     {
+        // Load all songs from database
+        var allSongs = _searchService.Search("");
+
+        // Convert to SearchResult format (ItemTemplate expects SearchResult.Song.*)
+        var searchResults = allSongs.Select(song => new SearchResult
+        {
+            Song = song,
+            MatchingLine = song.Category ?? "ترنيمة",
+            Query = ""
+        }).ToList();
+
+        // Switch to Search Results view
+        LyricsPanel.Visibility = Visibility.Collapsed;
+        SearchResultsPanel.Visibility = Visibility.Visible;
+
+        // Update title
+        SearchResultsTitle.Text = $"📚 كل الترنيمات ({allSongs.Count})";
+
+        // Display all songs
+        ResultsList.ItemsSource = searchResults;
+        NoResultsPanel.Visibility = allSongs.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        // Clear search box
         SearchBox.Text = string.Empty;
+
+        UpdateStatus($"تم عرض {allSongs.Count} ترنيمة");
+    }
+
+    /// <summary>
+    /// Opens PowerPoint on double-click in Results List.
+    /// </summary>
+    private void ResultsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ResultsList.SelectedItem is SearchResult result)
+        {
+            OpenPowerPointForSong(result.Song);
+        }
+    }
+
+    /// <summary>
+    /// Opens PowerPoint on double-click in History List.
+    /// </summary>
+    private void HistoryList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (HistoryList.SelectedItem is Song song)
+        {
+            OpenPowerPointForSong(song);
+        }
+    }
+
+    /// <summary>
+    /// Opens PowerPoint presentation for the specified song.
+    /// </summary>
+    private void OpenPowerPointForSong(Song song)
+    {
+        if (song == null) return;
+
+        var result = _powerPointService.OpenSongPresentation(song.Number);
+
+        if (result.Success)
+        {
+            UpdateStatus($"تم فتح العرض: {song.Number:D3}.pptx");
+        }
+        else
+        {
+            System.Windows.MessageBox.Show(result.ErrorMessage, "خطأ", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 }

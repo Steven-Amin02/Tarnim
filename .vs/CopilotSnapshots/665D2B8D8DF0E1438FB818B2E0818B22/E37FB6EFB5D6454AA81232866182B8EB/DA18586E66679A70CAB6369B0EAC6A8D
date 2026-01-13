@@ -1,0 +1,359 @@
+﻿using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
+using Tarnim.Models;
+using Tarnim.Services;
+using System.Windows.Media;
+
+using Wpf.Ui.Controls;
+
+namespace Tarnim;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : FluentWindow
+{
+    private readonly SearchService _searchService;
+    private readonly DispatcherTimer _searchDebounceTimer;
+    private readonly PowerPointService _powerPointService;
+    private readonly SettingsService _settingsService;
+    private readonly HistoryService _historyService;
+    private Song? _selectedSong;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+
+        // Initialize services using the global database
+        if (App.Database == null)
+        {
+            System.Windows.MessageBox.Show("Database not initialized.", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            Close();
+            _searchService = null!;
+            _searchDebounceTimer = null!;
+            _powerPointService = null!;
+            _settingsService = null!;
+            _historyService = null!;
+            return;
+        }
+
+        _searchService = new SearchService(App.Database);
+        _historyService = new HistoryService(App.Database);
+
+        // Initialize PowerPoint service with the pptx_files folder
+        string pptxFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pptx_files");
+        _powerPointService = new PowerPointService(pptxFolder);
+
+        // Initialize Settings service
+        _settingsService = new SettingsService();
+
+        // Setup debounce timer for search (300ms delay)
+        _searchDebounceTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(300)
+        };
+        _searchDebounceTimer.Tick += SearchDebounceTimer_Tick;
+
+        // Load History
+        RefreshHistory();
+
+        // Apply saved settings
+        ApplySettings();
+    }
+
+    private static void LoadAllSongs()
+    {
+        // No longer needed to load all songs into the list on startup
+        // The list is now for search results only
+    }
+
+    /// <summary>
+    /// Handles text changes in the search box with debouncing.
+    /// </summary>
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        // Reset and start the debounce timer
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
+    }
+
+    /// <summary>
+    /// Executes the search after debounce delay.
+    /// </summary>
+    private void SearchDebounceTimer_Tick(object? sender, EventArgs e)
+    {
+        _searchDebounceTimer.Stop();
+        PerformSearch();
+    }
+
+    /// <summary>
+    /// Performs the actual search.
+    /// </summary>
+    private void PerformSearch()
+    {
+        string query = SearchBox.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            // Empty search: Hide results, Show Lyrics
+            SearchResultsPanel.Visibility = Visibility.Collapsed;
+            LyricsPanel.Visibility = Visibility.Visible;
+            ResultsList.ItemsSource = null;
+            UpdateStatus("الرجاء إدخال كلمة للبحث");
+            return;
+        }
+
+        // Show Results Panel
+        SearchResultsPanel.Visibility = Visibility.Visible;
+        LyricsPanel.Visibility = Visibility.Collapsed;
+
+        try
+        {
+            var results = _searchService.SearchWithSnippets(query);
+            ResultsList.ItemsSource = results;
+
+            if (results.Count == 0)
+            {
+                ResultsList.Visibility = Visibility.Collapsed;
+                NoResultsPanel.Visibility = Visibility.Visible;
+                UpdateStatus("لم يتم العثور على نتائج");
+            }
+            else
+            {
+                ResultsList.Visibility = Visibility.Visible;
+                NoResultsPanel.Visibility = Visibility.Collapsed;
+                UpdateStatus($"تم العثور على {results.Count} ترنيمة");
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"خطأ في البحث: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Handles selection changes in the results list.
+    /// </summary>
+    private void ResultsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ResultsList.SelectedItem is SearchResult result)
+        {
+            SelectSong(result.Song);
+        }
+        else if (ResultsList.SelectedItem is Song song)
+        {
+            SelectSong(song);
+        }
+
+        // Clear selection to allow re-selecting the same item if needed (optional)
+        ResultsList.SelectedIndex = -1;
+    }
+
+    private void HistoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (HistoryList.SelectedItem is Song song)
+        {
+            SelectSong(song);
+        }
+        // Clear selection
+        HistoryList.SelectedIndex = -1;
+    }
+
+    private void SelectSong(Song song)
+    {
+        if (song == null) return;
+
+        _selectedSong = song;
+
+        // Switch to Lyrics View
+        SearchResultsPanel.Visibility = Visibility.Collapsed;
+        LyricsPanel.Visibility = Visibility.Visible;
+
+        // Display Song
+        DisplaySong(song);
+
+        // Add to History
+        _historyService.AddToHistory(song.Id);
+        RefreshHistory();
+    }
+
+    private void RefreshHistory()
+    {
+        HistoryList.ItemsSource = _historyService.GetHistory();
+    }
+
+    private void ClearHistory_Click(object sender, RoutedEventArgs e)
+    {
+        if (System.Windows.MessageBox.Show("هل أنت متأكد من مسح السجل؟", "تأكيد", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question) == System.Windows.MessageBoxResult.Yes)
+        {
+            _historyService.ClearHistory();
+            RefreshHistory();
+        }
+    }
+
+    /// <summary>
+    /// Displays the selected song in the preview panel.
+    /// </summary>
+    private void DisplaySong(Song song)
+    {
+        SongNumberText.Text = song.Number.ToString();
+        SongTitleText.Text = song.Title;
+        SongCategoryText.Text = song.Category ?? "ترنيمة"; // Show Category or default text
+        LyricsText.Text = song.Lyrics;
+
+        // Make the number badge visible
+        if (SongNumberText.Parent is Border badge)
+        {
+            badge.Visibility = Visibility.Visible;
+        }
+
+        // Enable PowerPoint button if PPTX file exists
+        bool pptxExists = _powerPointService.PptxFileExists(song.Number);
+        OpenPowerPointButton.IsEnabled = pptxExists;
+
+        // Scroll to top
+        if (LyricsText.Parent is ScrollViewer scrollViewer)
+        {
+            scrollViewer.ScrollToTop();
+        }
+
+        if (!pptxExists)
+        {
+            UpdateStatus($"ترنيمة {song.Number} - لا يوجد ملف عرض");
+        }
+        else
+        {
+            UpdateStatus($"ترنيمة {song.Number} - {song.Title}");
+        }
+    }
+
+    /// <summary>
+    /// Opens the PowerPoint presentation for the selected song.
+    /// </summary>
+    private void OpenPowerPointButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedSong == null)
+        {
+            System.Windows.MessageBox.Show("الرجاء اختيار ترنيمة أولاً", "تنبيه", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var result = _powerPointService.OpenSongPresentation(_selectedSong.Number);
+
+        if (!result.Success)
+        {
+            System.Windows.MessageBox.Show(result.ErrorMessage, "خطأ", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        else
+        {
+            UpdateStatus($"تم فتح العرض: {_selectedSong.Number:D3}.pptx");
+        }
+    }
+
+    /// <summary>
+    /// Updates the status (currently unused - status bar removed in new layout).
+    /// </summary>
+    private static void UpdateStatus(string message)
+    {
+        // Status bar removed in Phase 7 layout redesign
+        // Keeping method for potential future use
+        System.Diagnostics.Debug.WriteLine($"Status: {message}");
+    }
+
+    /// <summary>
+    /// Opens the settings window.
+    /// </summary>
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow(_settingsService)
+        {
+            Owner = this
+        };
+
+        if (settingsWindow.ShowDialog() == true)
+        {
+            ApplySettings();
+            UpdateStatus("تم حفظ الإعدادات");
+        }
+    }
+
+    /// <summary>
+    /// Applies current settings to UI elements.
+    /// </summary>
+    private void ApplySettings()
+    {
+        // Reload settings from service to ensure we have the latest
+        var settings = _settingsService.CurrentSettings;
+        LyricsText.FontSize = settings.LyricsFontSize;
+
+        // Apply theme
+        ApplyTheme(settings.Theme);
+    }
+
+    /// <summary>
+    /// Applies the specified theme (Light or Dark).
+    /// </summary>
+    private void ApplyTheme(Models.ThemeMode theme)
+    {
+        try
+        {
+            if (theme == Models.ThemeMode.Light)
+            {
+                // Sync WPF-UI Library Theme
+                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Light);
+
+                // ☀️ Light Theme Palette (Paper White / Slate)
+                var bg = (Color)ColorConverter.ConvertFromString("#f8fafc"); // Slate 50
+                var surface = (Color)ColorConverter.ConvertFromString("#ffffff"); // White
+                var surfaceHighlight = (Color)ColorConverter.ConvertFromString("#f1f5f9"); // Slate 100
+                var textPrimary = (Color)ColorConverter.ConvertFromString("#0f172a"); // Slate 900
+                var textSecondary = (Color)ColorConverter.ConvertFromString("#64748b"); // Slate 500
+                var accent = (Color)ColorConverter.ConvertFromString("#d97706"); // Amber 600
+                var border = (Color)ColorConverter.ConvertFromString("#e2e8f0"); // Slate 200
+
+                // Update Resources
+                Application.Current.Resources["BgBrush"] = new SolidColorBrush(bg);
+                Application.Current.Resources["SurfaceBrush"] = new SolidColorBrush(surface);
+                Application.Current.Resources["SurfaceHighlightBrush"] = new SolidColorBrush(surfaceHighlight);
+                Application.Current.Resources["TextPrimaryBrush"] = new SolidColorBrush(textPrimary);
+                Application.Current.Resources["TextSecondaryBrush"] = new SolidColorBrush(textSecondary);
+                Application.Current.Resources["AccentBrush"] = new SolidColorBrush(accent);
+                Application.Current.Resources["BorderBrush"] = new SolidColorBrush(border);
+            }
+            else
+            {
+                // 🌙 Dark Theme Palette (Royal Serenity)
+                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark);
+
+                var bg = (Color)ColorConverter.ConvertFromString("#0f172a"); // Slate 900
+                var surface = (Color)ColorConverter.ConvertFromString("#1e293b"); // Slate 800
+                var surfaceHighlight = (Color)ColorConverter.ConvertFromString("#334155"); // Slate 700
+                var textPrimary = (Color)ColorConverter.ConvertFromString("#f8fafc"); // Slate 50
+                var textSecondary = (Color)ColorConverter.ConvertFromString("#94a3b8"); // Slate 400
+                var accent = (Color)ColorConverter.ConvertFromString("#fbbf24"); // Amber 400
+                var border = (Color)ColorConverter.ConvertFromString("#334155"); // Slate 700
+
+                // Update Resources
+                Application.Current.Resources["BgBrush"] = new SolidColorBrush(bg);
+                Application.Current.Resources["SurfaceBrush"] = new SolidColorBrush(surface);
+                Application.Current.Resources["SurfaceHighlightBrush"] = new SolidColorBrush(surfaceHighlight);
+                Application.Current.Resources["TextPrimaryBrush"] = new SolidColorBrush(textPrimary);
+                Application.Current.Resources["TextSecondaryBrush"] = new SolidColorBrush(textSecondary);
+                Application.Current.Resources["AccentBrush"] = new SolidColorBrush(accent);
+                Application.Current.Resources["BorderBrush"] = new SolidColorBrush(border);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Theme application error: {ex.Message}");
+        }
+    }
+
+    private void ShowAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        SearchBox.Text = string.Empty;
+    }
+}
