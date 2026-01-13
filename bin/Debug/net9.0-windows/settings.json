@@ -1,7 +1,7 @@
 {
-  "LyricsFontSize": 28,
-  "Theme": 0,
-  "BackgroundColor": "#1e293b",
+  "LyricsFontSize": 34,
+  "Theme": 1,
+  "BackgroundColor": "#0f172a",
   "PanelColor": "#1e293b",
   "AccentColor": "#fbbf24"
 }
