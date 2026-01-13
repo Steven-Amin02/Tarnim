@@ -23,7 +23,7 @@
 
   <!-- Copy logo files to output -->
   <ItemGroup>
-    <Resource Include="logo.ico" />
+    <Resource Include="logoo.ico" />
     <Content Include="logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
