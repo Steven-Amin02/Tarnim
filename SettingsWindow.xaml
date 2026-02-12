@@ -5,16 +5,16 @@
         Height="580" Width="550"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#0f172a"
+        Background="{DynamicResource SettingsWindowBackgroundBrush}"
         FlowDirection="RightToLeft"
-        Foreground="#f8fafc"
+        Foreground="{DynamicResource SettingsPrimaryTextBrush}"
         WindowStyle="None"
         AllowsTransparency="False">
     
     <Window.Resources>
         <!-- Accent Gradient Button -->
         <Style x:Key="GoldButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#0f172a"/>
+            <Setter Property="Foreground" Value="{DynamicResource SettingsWindowBackgroundBrush}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="20,10"/>
@@ -45,7 +45,7 @@
         </Style>
         
         <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#f8fafc"/>
+            <Setter Property="Foreground" Value="{DynamicResource SettingsPrimaryTextBrush}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="20,10"/>
@@ -54,16 +54,16 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" 
-                                Background="#334155" 
+                                Background="{DynamicResource SettingsSurfaceAltBrush}" 
                                 CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#475569"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SettingsBorderBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1e293b"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SettingsSurfaceBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -79,8 +79,8 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="border"
-                                Background="#1e293b"
-                                BorderBrush="#334155"
+                                Background="{DynamicResource SettingsSurfaceBrush}"
+                                BorderBrush="{DynamicResource SettingsBorderBrush}"
                                 BorderThickness="2"
                                 CornerRadius="8"
                                 Padding="15,8"
@@ -89,11 +89,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#fbbf24"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SettingsAccentBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#334155"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#fbbf24"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SettingsSurfaceAltBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SettingsAccentBrush}"/>
                                 <Setter TargetName="border" Property="BorderThickness" Value="3"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -114,14 +114,14 @@
                                 Height="50"
                                 CornerRadius="25"
                                 BorderThickness="2"
-                                BorderBrush="#64748b"
+                                BorderBrush="{DynamicResource SettingsSecondaryTextBrush}"
                                 Cursor="Hand"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="colorBorder" Property="BorderBrush" Value="#94a3b8"/>
+                                <Setter TargetName="colorBorder" Property="BorderBrush" Value="{DynamicResource SettingsSecondaryTextBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="colorBorder" Property="BorderBrush" Value="#fbbf24"/>
+                                <Setter TargetName="colorBorder" Property="BorderBrush" Value="{DynamicResource SettingsAccentBrush}"/>
                                 <Setter TargetName="colorBorder" Property="BorderThickness" Value="3"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -131,38 +131,47 @@
         </Style>
     </Window.Resources>
 
-    <Grid Background="#0f172a">
+    <Grid Background="{DynamicResource SettingsWindowBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Custom Title Bar with Controls on Right -->
-        <Grid x:Name="titleBar" Grid.Row="0" Height="32" Background="#0f172a" FlowDirection="LeftToRight">
+        <Grid x:Name="titleBar" Grid.Row="0" Height="32" Background="{DynamicResource SettingsTitleBarBackgroundBrush}" FlowDirection="LeftToRight">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Title Text (RTL) -->
-            <TextBlock Grid.Column="0" 
-                       Text="الإعدادات" 
-                       Foreground="#f8fafc" 
-                       FontSize="14"
-                       FontWeight="SemiBold"
-                       VerticalAlignment="Center"
-                       Margin="15,0,0,0"
-                       FlowDirection="RightToLeft"/>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0" FlowDirection="RightToLeft">
+                <TextBlock x:Name="WindowTitleText"
+                           Text="الإعدادات"
+                           Foreground="{DynamicResource SettingsPrimaryTextBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           FlowDirection="RightToLeft"/>
+                <TextBlock x:Name="WindowTitleIcon"
+                           Text="⚙"
+                           Foreground="{DynamicResource SettingsAccentBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center"
+                           FlowDirection="RightToLeft"/>
+            </StackPanel>
 
             <!-- Window Controls on Right -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,5,0">
-                <Button Content="−" Width="40" Height="32" Background="Transparent" Foreground="#f8fafc" 
+                <Button Content="−" Width="40" Height="32" Background="Transparent" Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                         FontSize="18" Click="MinimizeButton_Click" BorderThickness="0" Cursor="Hand"
                         ToolTip="Minimize"/>
-                <Button Content="□" Width="40" Height="32" Background="Transparent" Foreground="#f8fafc" 
+                <Button Content="□" Width="40" Height="32" Background="Transparent" Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                         FontSize="16" Click="MaximizeButton_Click" BorderThickness="0" Cursor="Hand"
                         ToolTip="Maximize"/>
-                <Button Content="✕" Width="40" Height="32" Background="Transparent" Foreground="#f8fafc" 
+                <Button Content="✕" Width="40" Height="32" Background="Transparent" Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                         FontSize="16" Click="CloseButton_Click" BorderThickness="0" Cursor="Hand"
                         ToolTip="Close"/>
             </StackPanel>
@@ -184,17 +193,25 @@
                 </Grid.RowDefinitions>
                 
                 <!-- Title -->
-                <TextBlock Grid.Row="0" 
-                           Text="⚙️ الإعدادات" 
-                           FontSize="28" 
-                           FontWeight="Bold" 
-                           Foreground="#f8fafc"
-                           Margin="0,0,0,5"/>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+                    <TextBlock x:Name="SettingsHeaderText"
+                               Text="الإعدادات"
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource SettingsPrimaryTextBrush}"
+                               Margin="0,0,0,5"/>
+                    <TextBlock x:Name="SettingsHeaderIcon"
+                               Text="⚙"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource SettingsAccentBrush}"
+                               Margin="8,0,0,5"/>
+                </StackPanel>
                 
                 <!-- Theme Toggle -->
                 <StackPanel Grid.Row="2">
                     <TextBlock Text="🎨 اختر المظهر" 
-                               Foreground="#f8fafc" 
+                               Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                                FontSize="16" 
                                FontWeight="SemiBold"
                                Margin="0,0,0,12"/>
@@ -205,13 +222,13 @@
                                      Checked="ThemeRadio_Checked"
                                      Style="{StaticResource ThemeRadioButtonStyle}"
                                      Margin="0,0,10,0">
-                            <TextBlock Text="🌙 داكن" Foreground="#f8fafc" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock x:Name="ThemeDarkLabel" Text="🌙 داكن" Foreground="{DynamicResource SettingsPrimaryTextBrush}" FontWeight="SemiBold" FontSize="14"/>
                         </RadioButton>
                         <RadioButton x:Name="ThemeLight" 
                                      GroupName="Theme"
                                      Checked="ThemeRadio_Checked"
                                      Style="{StaticResource ThemeRadioButtonStyle}">
-                            <TextBlock Text="☀️ فاتح" Foreground="#f8fafc" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock x:Name="ThemeLightLabel" Text="☀️ فاتح" Foreground="{DynamicResource SettingsPrimaryTextBrush}" FontWeight="SemiBold" FontSize="14"/>
                         </RadioButton>
                     </StackPanel>
                 </StackPanel>
@@ -219,7 +236,7 @@
                 <!-- Font Size Setting -->
                 <StackPanel Grid.Row="4">
                     <TextBlock Text="📝 حجم خط الكلمات" 
-                               Foreground="#f8fafc" 
+                               Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                                FontSize="16"
                                FontWeight="SemiBold"
                                Margin="0,0,0,12"/>
@@ -236,37 +253,37 @@
                                 TickFrequency="2"
                                 IsSnapToTickEnabled="True"
                                 ValueChanged="FontSizeSlider_ValueChanged"
-                                Foreground="#fbbf24"
-                                Background="#1e293b"
+                                Foreground="{DynamicResource SettingsAccentBrush}"
+                                Background="{DynamicResource SettingsSurfaceBrush}"
                                 VerticalAlignment="Center"
                                 Margin="0,0,15,0"
                                 Height="6"/>
                         <TextBlock x:Name="FontSizeText" 
                                    Grid.Column="1"
                                    Text="28" 
-                                   Foreground="#fbbf24" 
+                                   Foreground="{DynamicResource SettingsAccentBrush}" 
                                    FontSize="18" 
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
-                                   Background="#1e293b"
+                                   Background="{DynamicResource SettingsSurfaceAltBrush}"
                                    Padding="8,4"
                                    TextAlignment="Center"/>
                     </Grid>
                     <TextBlock x:Name="FontPreview" 
                                Text="مثال على حجم الخط" 
-                               Foreground="#94a3b8" 
+                               Foreground="{DynamicResource SettingsSecondaryTextBrush}" 
                                FontSize="28"
                                Margin="0,15,0,0"
                                TextAlignment="Center"
-                               Background="#1e293b"
+                               Background="{DynamicResource SettingsSurfaceAltBrush}"
                                Padding="15,10"/>
                 </StackPanel>
                 
                 <!-- Background Color Setting -->
                 <StackPanel Grid.Row="6">
                     <TextBlock Text="🎯 اختر لون الخلفية" 
-                               Foreground="#f8fafc" 
+                               Foreground="{DynamicResource SettingsPrimaryTextBrush}" 
                                FontSize="16"
                                FontWeight="SemiBold"
                                Margin="0,0,0,12"/>
@@ -333,4 +350,3 @@
         </ScrollViewer>
     </Grid>
 </Window>
-

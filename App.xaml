@@ -27,6 +27,16 @@
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
             <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderDark}"/>
+
+            <!-- Settings window semantic brushes (runtime-updated) -->
+            <SolidColorBrush x:Key="SettingsWindowBackgroundBrush" Color="{StaticResource BgDark}"/>
+            <SolidColorBrush x:Key="SettingsTitleBarBackgroundBrush" Color="{StaticResource BgDark}"/>
+            <SolidColorBrush x:Key="SettingsSurfaceBrush" Color="{StaticResource SurfaceDark}"/>
+            <SolidColorBrush x:Key="SettingsSurfaceAltBrush" Color="{StaticResource SurfaceHighlightDark}"/>
+            <SolidColorBrush x:Key="SettingsPrimaryTextBrush" Color="{StaticResource TextPrimary}"/>
+            <SolidColorBrush x:Key="SettingsSecondaryTextBrush" Color="{StaticResource TextSecondary}"/>
+            <SolidColorBrush x:Key="SettingsAccentBrush" Color="{StaticResource AccentGold}"/>
+            <SolidColorBrush x:Key="SettingsBorderBrush" Color="{StaticResource BorderDark}"/>
             
             <!-- Light Theme Colors (for reference in code) -->
             <Color x:Key="BgLight">#f8fafc</Color>
