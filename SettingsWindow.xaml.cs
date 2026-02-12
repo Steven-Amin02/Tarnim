@@ -41,24 +41,22 @@ namespace Tarnim
             SelectColorRadio(_tempSettings.BackgroundColor);
 
             // Select the correct theme radio button
-            if (_tempSettings.Theme == Models.ThemeMode.Light)
+            if (_tempSettings.Theme == ThemeMode.Light)
                 ThemeLight.IsChecked = true;
             else
                 ThemeDark.IsChecked = true;
 
-            // Apply initial theme to window (partial - Visual Tree may not be ready)
+            // Apply initial theme to window
             ApplyThemeToWindow(_tempSettings.Theme);
 
             // Subscribe to Loaded event to reapply theme after Visual Tree is ready
-            this.Loaded += SettingsWindow_Loaded;
+            Loaded += SettingsWindow_Loaded;
 
             _isInitializing = false;
         }
 
         private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Reapply theme after Visual Tree is fully loaded
-            // This ensures all elements are styled correctly on first open
             ApplyThemeToWindow(_tempSettings.Theme);
         }
 
@@ -102,269 +100,89 @@ namespace Tarnim
 
             if (ThemeDark != null && ThemeLight != null)
             {
-                _tempSettings.Theme = ThemeDark.IsChecked == true ? Models.ThemeMode.Dark : Models.ThemeMode.Light;
+                _tempSettings.Theme = ThemeDark.IsChecked == true ? ThemeMode.Dark : ThemeMode.Light;
                 ApplyThemeToWindow(_tempSettings.Theme);
             }
         }
 
         /// <summary>
-        /// Applies theme colors to the Settings window in real-time
+        /// Applies theme colors to the Settings window in real-time.
         /// </summary>
-        private void ApplyThemeToWindow(Models.ThemeMode theme)
+        private void ApplyThemeToWindow(ThemeMode theme)
         {
-            if (theme == Models.ThemeMode.Light)
+            if (theme == ThemeMode.Light)
             {
-                ApplyLightTheme();
+                ApplyThemeResources(
+                    windowBackground: "#f8fafc",
+                    titleBarBackground: "#ffffff",
+                    surface: "#ffffff",
+                    surfaceAlt: "#e2e8f0",
+                    primaryText: "#0f172a",
+                    secondaryText: "#64748b",
+                    accent: "#d97706",
+                    border: "#cbd5e1");
             }
             else
             {
-                ApplyDarkTheme();
+                ApplyThemeResources(
+                    windowBackground: "#0f172a",
+                    titleBarBackground: "#0f172a",
+                    surface: "#1e293b",
+                    surfaceAlt: "#334155",
+                    primaryText: "#f8fafc",
+                    secondaryText: "#94a3b8",
+                    accent: "#fbbf24",
+                    border: "#475569");
             }
+
+            ApplyThemeExceptions();
         }
 
-        private void ApplyLightTheme()
+        private void ApplyThemeResources(
+            string windowBackground,
+            string titleBarBackground,
+            string surface,
+            string surfaceAlt,
+            string primaryText,
+            string secondaryText,
+            string accent,
+            string border)
         {
-            try
-            {
-                // ☀️ Light Theme Color Palette
-                var bgColor = (Color)ColorConverter.ConvertFromString("#f8fafc");        // Slate 50
-                var surfaceColor = (Color)ColorConverter.ConvertFromString("#ffffff");   // White
-                var surfaceAltColor = (Color)ColorConverter.ConvertFromString("#e2e8f0"); // Slate 200
-                var textPrimaryColor = (Color)ColorConverter.ConvertFromString("#0f172a"); // Slate 900
-                var textSecondaryColor = (Color)ColorConverter.ConvertFromString("#64748b"); // Slate 500
-                var accentColor = (Color)ColorConverter.ConvertFromString("#d97706");    // Amber 600
-                var borderColor = (Color)ColorConverter.ConvertFromString("#cbd5e1");    // Slate 300
-
-                var bgBrush = new SolidColorBrush(bgColor);
-                var surfaceBrush = new SolidColorBrush(surfaceColor);
-                var surfaceAltBrush = new SolidColorBrush(surfaceAltColor);
-                var textPrimaryBrush = new SolidColorBrush(textPrimaryColor);
-                var textSecondaryBrush = new SolidColorBrush(textSecondaryColor);
-                var accentBrush = new SolidColorBrush(accentColor);
-                var borderBrush = new SolidColorBrush(borderColor);
-
-                // Main window background
-                this.Background = bgBrush;
-
-                // Update title bar
-                if (this.FindName("titleBar") is Grid titleBar)
-                {
-                    titleBar.Background = surfaceBrush;
-                    foreach (var child in LogicalTreeHelper.GetChildren(titleBar))
-                    {
-                        if (child is StackPanel sp)
-                        {
-                            foreach (var btn in sp.Children)
-                            {
-                                if (btn is Button button)
-                                    button.Foreground = textPrimaryBrush;
-                            }
-                        }
-                        else if (child is TextBlock tb)
-                        {
-                            tb.Foreground = textPrimaryBrush;
-                        }
-                    }
-                }
-
-                // Update main content Grid
-                if (this.Content is Grid mainGrid)
-                {
-                    mainGrid.Background = bgBrush;
-                }
-
-                // Update FontSizeText (number display)
-                if (FontSizeText != null)
-                {
-                    FontSizeText.Background = surfaceAltBrush;
-                    FontSizeText.Foreground = accentBrush;
-                }
-
-                // Update FontPreview (text sample)
-                if (FontPreview != null)
-                {
-                    FontPreview.Background = surfaceAltBrush;
-                    FontPreview.Foreground = textSecondaryBrush;
-                }
-
-                // Update Slider
-                if (FontSizeSlider != null)
-                {
-                    FontSizeSlider.Background = surfaceAltBrush;
-                }
-
-                // Update Theme Radio Buttons
-                UpdateRadioButtonTheme(ThemeDark, surfaceAltBrush, borderBrush, textPrimaryBrush);
-                UpdateRadioButtonTheme(ThemeLight, surfaceAltBrush, borderBrush, textPrimaryBrush);
-
-                // Update all other TextBlocks using Dispatcher for reliable Visual Tree access
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        UpdateAllTextBlocks("#0f172a");
-                    }
-                    catch { }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
-            }
-            catch (System.Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error applying light theme: {ex.Message}");
-            }
+            UpdateBrushResource("SettingsWindowBackgroundBrush", windowBackground);
+            UpdateBrushResource("SettingsTitleBarBackgroundBrush", titleBarBackground);
+            UpdateBrushResource("SettingsSurfaceBrush", surface);
+            UpdateBrushResource("SettingsSurfaceAltBrush", surfaceAlt);
+            UpdateBrushResource("SettingsPrimaryTextBrush", primaryText);
+            UpdateBrushResource("SettingsSecondaryTextBrush", secondaryText);
+            UpdateBrushResource("SettingsAccentBrush", accent);
+            UpdateBrushResource("SettingsBorderBrush", border);
         }
 
-        private void ApplyDarkTheme()
+        private void UpdateBrushResource(string key, string colorHex)
         {
-            try
+            if (TryFindResource(key) is SolidColorBrush brush)
             {
-                // 🌙 Dark Theme Color Palette (Royal Serenity)
-                var bgColor = (Color)ColorConverter.ConvertFromString("#0f172a");        // Slate 900
-                var surfaceColor = (Color)ColorConverter.ConvertFromString("#1e293b");   // Slate 800
-                var surfaceAltColor = (Color)ColorConverter.ConvertFromString("#334155"); // Slate 700
-                var textPrimaryColor = (Color)ColorConverter.ConvertFromString("#f8fafc"); // Slate 50
-                var textSecondaryColor = (Color)ColorConverter.ConvertFromString("#94a3b8"); // Slate 400
-                var accentColor = (Color)ColorConverter.ConvertFromString("#fbbf24");    // Amber 400
-                var borderColor = (Color)ColorConverter.ConvertFromString("#475569");    // Slate 600
-
-                var bgBrush = new SolidColorBrush(bgColor);
-                var surfaceBrush = new SolidColorBrush(surfaceColor);
-                var surfaceAltBrush = new SolidColorBrush(surfaceAltColor);
-                var textPrimaryBrush = new SolidColorBrush(textPrimaryColor);
-                var textSecondaryBrush = new SolidColorBrush(textSecondaryColor);
-                var accentBrush = new SolidColorBrush(accentColor);
-                var borderBrush = new SolidColorBrush(borderColor);
-
-                // Main window background
-                this.Background = bgBrush;
-
-                // Update title bar
-                if (this.FindName("titleBar") is Grid titleBar)
-                {
-                    titleBar.Background = bgBrush;
-                    foreach (var child in LogicalTreeHelper.GetChildren(titleBar))
-                    {
-                        if (child is StackPanel sp)
-                        {
-                            foreach (var btn in sp.Children)
-                            {
-                                if (btn is Button button)
-                                    button.Foreground = textPrimaryBrush;
-                            }
-                        }
-                        else if (child is TextBlock tb)
-                        {
-                            tb.Foreground = textPrimaryBrush;
-                        }
-                    }
-                }
-
-                // Update main content Grid
-                if (this.Content is Grid mainGrid)
-                {
-                    mainGrid.Background = bgBrush;
-                }
-
-                // Update FontSizeText (number display)
-                if (FontSizeText != null)
-                {
-                    FontSizeText.Background = surfaceAltBrush;
-                    FontSizeText.Foreground = accentBrush;
-                }
-
-                // Update FontPreview (text sample)
-                if (FontPreview != null)
-                {
-                    FontPreview.Background = surfaceAltBrush;
-                    FontPreview.Foreground = textSecondaryBrush;
-                }
-
-                // Update Slider
-                if (FontSizeSlider != null)
-                {
-                    FontSizeSlider.Background = surfaceAltBrush;
-                }
-
-                // Update Theme Radio Buttons
-                UpdateRadioButtonTheme(ThemeDark, surfaceAltBrush, borderBrush, textPrimaryBrush);
-                UpdateRadioButtonTheme(ThemeLight, surfaceAltBrush, borderBrush, textPrimaryBrush);
-
-                // Update all other TextBlocks using Dispatcher for reliable Visual Tree access
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        UpdateAllTextBlocks("#f8fafc");
-                    }
-                    catch { }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
-            }
-            catch (System.Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error applying dark theme: {ex.Message}");
+                brush.Color = (Color)ColorConverter.ConvertFromString(colorHex);
             }
         }
 
         /// <summary>
-        /// Updates a radio button's visual appearance for theme changes
+        /// Applies small non-resource exceptions explicitly by control name/type.
         /// </summary>
-        private void UpdateRadioButtonTheme(RadioButton? radio, SolidColorBrush bgBrush, SolidColorBrush borderBrush, SolidColorBrush textBrush)
+        private void ApplyThemeExceptions()
         {
-            if (radio?.Template?.FindName("border", radio) is Border border)
+            if (TryFindResource("SettingsAccentBrush") is SolidColorBrush accentBrush)
             {
-                border.Background = bgBrush;
-                border.BorderBrush = borderBrush;
-            }
-            // Update text inside radio button
-            if (radio?.Content is TextBlock tb)
-            {
-                tb.Foreground = textBrush;
-            }
-        }
-
-        /// <summary>
-        /// Recursively updates all TextBlock foreground colors
-        /// </summary>
-        private void UpdateAllTextBlocks(string colorHex)
-        {
-            try
-            {
-                var color = (Color)ColorConverter.ConvertFromString(colorHex);
-                var brush = new SolidColorBrush(color);
-
-                UpdateTextBlocksRecursive(this, brush);
-            }
-            catch (System.Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error updating text blocks: {ex.Message}");
-            }
-        }
-
-        private void UpdateTextBlocksRecursive(DependencyObject parent, SolidColorBrush brush)
-        {
-            int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-
-                if (child is TextBlock textBlock)
+                if (WindowTitleIcon is TextBlock)
                 {
-                    // Skip updating hardcoded theme button text colors
-                    if (!IsThemeButton(textBlock))
-                    {
-                        textBlock.Foreground = brush;
-                    }
+                    WindowTitleIcon.Foreground = accentBrush;
                 }
 
-                // Recurse into child elements
-                UpdateTextBlocksRecursive(child, brush);
+                if (SettingsHeaderIcon is TextBlock)
+                {
+                    SettingsHeaderIcon.Foreground = accentBrush;
+                }
             }
-        }
-
-        private bool IsThemeButton(TextBlock textBlock)
-        {
-            // Keep theme button text (sun/moon emojis) in their original colors for visibility
-            string text = textBlock.Text;
-            return text.Contains("🌙") || text.Contains("☀️") || text.Contains("⚙️");
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -390,15 +208,14 @@ namespace Tarnim
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = this.WindowState == WindowState.Maximized
+            WindowState = WindowState == WindowState.Maximized
                 ? WindowState.Normal
                 : WindowState.Maximized;
         }
     }
 }
-
