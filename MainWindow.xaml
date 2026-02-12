@@ -182,7 +182,7 @@
 
                 <!-- Logo -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,30,0">
-                    <TextBlock Text="🎵" FontSize="28" Margin="0,0,12,0" Foreground="{DynamicResource AccentBrush}"/>
+                    <ui:SymbolIcon Symbol="MusicNote224" Style="{StaticResource ActionIconStyle}" Margin="0,0,12,0"/>
                     <TextBlock Text="ترنيمات روحية" 
                                FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
                 </StackPanel>
@@ -209,11 +209,17 @@
                                Cursor="Hand" 
                                ToolTip="عرض كل الترانيم"
                                Margin="0,0,12,0">
-                        <TextBlock Text="📋" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="AppsList24" Style="{StaticResource TopBarIconStyle}"/>
+                            <TextBlock Text="عرض الكل" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Button>
 
                     <Button x:Name="SettingsButton" Click="SettingsButton_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="الإعدادات">
-                        <TextBlock Text="⚙️" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Settings24" Style="{StaticResource TopBarIconStyle}"/>
+                            <TextBlock Text="الإعدادات" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -238,10 +244,12 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="🕑 السجل" 
-                               FontSize="18" FontWeight="Bold" 
-                               Foreground="{DynamicResource TextPrimaryBrush}" 
-                               Margin="0,0,0,16"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <ui:SymbolIcon Symbol="History24" Style="{StaticResource ActionIconStyle}" Margin="0,0,8,0"/>
+                        <TextBlock Text="السجل" 
+                                   FontSize="18" FontWeight="Bold" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </StackPanel>
 
                     <ListBox x:Name="HistoryList" 
                              Grid.Row="1"
@@ -351,7 +359,7 @@
 
                                 <!-- EMPTY STATE -->
                                 <StackPanel x:Name="NoResultsPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.7">
-                                    <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <ui:SymbolIcon Symbol="Search24" FontSize="48" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,12" Opacity="0.8"/>
                                     <TextBlock Text="لا توجد نتائج" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="حاول البحث بكلمات أخرى" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
                                 </StackPanel>
@@ -400,10 +408,15 @@
                             <!-- Actions -->
                             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button x:Name="OpenPowerPointButton" 
-                                        Content="🖥️ فتح العرض" 
+                                        Padding="16,10" 
                                         Style="{StaticResource GoldButtonStyle}" 
                                         IsEnabled="False"
-                                        Click="OpenPowerPointButton_Click"/>
+                                        Click="OpenPowerPointButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Presenter24" Style="{StaticResource ActionIconStyle}"/>
+                                        <TextBlock Text="فتح العرض" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
